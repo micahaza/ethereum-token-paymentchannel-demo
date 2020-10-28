@@ -1,0 +1,18 @@
+{
+  "name": "token-paymentchannel-demo",
+  "version": "1.0.0",
+  "description": "Simple token payment implementation in Ethereum state channel",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.2.0"
+  }
+}
