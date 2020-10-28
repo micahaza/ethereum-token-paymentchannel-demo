@@ -2,17 +2,17 @@ const HUFToken = artifacts.require('HUFToken.sol')
 const TokenStateChannel = artifacts.require('TokenStateChannel.sol');
 const BN = web3.utils.BN;
 
-contract('Two Way State Channel', addresses => {
+let token, twst
 
-    const [token_owner, state_channel_owner, participant1, participant2, _] = addresses;
-    
-    let token, twst
-    
+contract('State channel and token initialization', addresses => {
+
+    const [token_owner, state_channel_owner, participant1, participant2, _] = addresses;        
+
     before( async () => {
         token = await HUFToken.new({from: token_owner})
         twst = await TokenStateChannel.new(token.address, {from: state_channel_owner})
     })
-    
+        
     it('Token is deployed', async () => {
         assert(await token.symbol() === 'HUF')
         assert(await token.owner() === token_owner)
@@ -35,6 +35,10 @@ contract('Two Way State Channel', addresses => {
         token.mint(participant2, web3.utils.toWei('20', 'ether'), {from: token_owner})
         assert((await token.totalSupply()).eq(new BN(web3.utils.toWei('40', 'ether'))))
         assert((await token.balanceOf(participant2)).eq(new BN(web3.utils.toWei('20', 'ether'))))
+    })
+
+    it('We can open the state channel', async () => {
+        
     })
 
 })
