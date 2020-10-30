@@ -7,6 +7,12 @@ let token, twst
 contract('State channel and token initialization', addresses => {
 
     const [token_owner, state_channel_owner, participant1, participant2, _] = addresses;        
+    
+    let participant1_tokens = web3.utils.toWei('20', 'ether')
+    let participant2_tokens = web3.utils.toWei('10', 'ether')
+
+    let participant1_deposit = web3.utils.toWei('2', 'ether')
+    let participant2_deposit = web3.utils.toWei('3', 'ether')
 
     before( async () => {
         token = await HUFToken.new({from: token_owner})
@@ -20,25 +26,44 @@ contract('State channel and token initialization', addresses => {
         assert((await token.totalSupply()).isZero())
     })
 
-    it('State Channel contract is deployed', async () => {
+    it('Token payment channel contract is deployed', async () => {
         assert(await twst.owner() === state_channel_owner)
-        assert(await twst.hufToken() === token.address)
+        assert(await twst.huf_token() === token.address)
     })
 
     it('We can mint tokens for participant1', async () => {
-        token.mint(participant1, web3.utils.toWei('20', 'ether'), {from: token_owner})
-        assert((await token.totalSupply()).eq(new BN(web3.utils.toWei('20', 'ether'))))
-        assert((await token.balanceOf(participant1)).eq(new BN(web3.utils.toWei('20', 'ether'))))
+        token.mint(participant1, participant1_tokens, {from: token_owner})
+        assert((await token.balanceOf(participant1)) == participant1_tokens)
     })
 
     it('We can mint tokens for participant2', async () => {
-        token.mint(participant2, web3.utils.toWei('20', 'ether'), {from: token_owner})
-        assert((await token.totalSupply()).eq(new BN(web3.utils.toWei('40', 'ether'))))
-        assert((await token.balanceOf(participant2)).eq(new BN(web3.utils.toWei('20', 'ether'))))
+        token.mint(participant2, participant2_tokens, {from: token_owner})
+        assert((await token.balanceOf(participant2)) == participant2_tokens)
     })
 
-    it('We can open the state channel', async () => {
-        
+    it('Participant1 can create a payment channel with deposit', async () => {
+        await token.approve(twst.address, participant1_deposit, {from: participant1})
+        await twst.createChannel(participant1_deposit, {from: participant1})
+        assert((await token.balanceOf(twst.address)) == participant1_deposit)
+        assert((await twst.channel_cnt()) == 1)
     })
 
+    it('participant2 can join to channel with funds', async () => {
+        total_funds = new BN(participant1_deposit).add(new BN(participant2_deposit))
+        await token.approve(twst.address, participant2_deposit, {from: participant2})
+        await twst.join(1, participant2_deposit, {from: participant2})
+        assert((await token.balanceOf(twst.address)).eq(total_funds))
+    })
+
+    it.skip('participant2 can sign a SCR message', async() => {
+
+    })
+
+    it.skip('participant1 can sign a SCR message signed by participant1', async() => {
+
+    })
+
+    it.skip('participant1 can redeem his first SRC payment  ', async() => {
+
+    })
 })
